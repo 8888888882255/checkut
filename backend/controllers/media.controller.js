@@ -2,22 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const slugify = require('slugify');
 const sharp = require('sharp');
-const { Media } = require('../models'); // Import model Sequelize
+const { Media } = require('../models');
 
-// 📦 Đường dẫn thư mục lưu file
 const ORIGINAL_DIR = path.join(__dirname, '../uploads/original');
-const OPTIMIZED_DIR = path.join(__dirname, '../uploads/optimized');
-
-// Đảm bảo thư mục tồn tại
 if (!fs.existsSync(ORIGINAL_DIR)) fs.mkdirSync(ORIGINAL_DIR, { recursive: true });
-if (!fs.existsSync(OPTIMIZED_DIR)) fs.mkdirSync(OPTIMIZED_DIR, { recursive: true });
 
-// 🟢 Upload & xử lý file
+// 🟢 Upload file ảnh/gif
 exports.uploadMedia = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ message: 'Không có file nào được upload.' });
-    }
+    if (!req.file) return res.status(400).json({ message: 'Không có file nào được upload.' });
 
     const { originalname, mimetype, size, filename, path: filePath } = req.file;
     const ext = path.extname(originalname).toLowerCase();
@@ -25,46 +18,50 @@ exports.uploadMedia = async (req, res) => {
     const slug = slugify(baseName, { lower: true, strict: true });
     const seoTitle = baseName.replace(/[-_]/g, ' ');
 
+    // 🧩 Nhận loại media (logo, banner1,...)
+    const { type_name } = req.body;
+    const allowedTypes = [
+      'logo', 'thuonghieu', 'nen', 'avt_macdinh', 'bia_macdinh',
+      'banner1', 'banner2', 'banner3', 'banner4', 'banner5'
+    ];
+    if (!type_name || !allowedTypes.includes(type_name)) {
+      return res.status(400).json({ message: 'Loại media không hợp lệ.' });
+    }
+
     const fileType = (() => {
       if (mimetype.startsWith('image/')) return 'image';
+      if (mimetype.includes('gif')) return 'gif';
       if (mimetype.startsWith('video/')) return 'video';
       if (mimetype === 'application/pdf') return 'pdf';
-      if (mimetype.includes('gif')) return 'gif';
       return 'other';
     })();
 
-    // ✅ Đường dẫn gốc (file chưa nén)
+    // ✅ Đường dẫn file gốc
     const originalPath = `/uploads/original/${filename}`;
-
-    let optimizedPath = null;
     let width = null;
     let height = null;
 
-    // ✅ Nén file ảnh bằng Sharp
+    // ✅ Lấy metadata nếu là ảnh/gif
     if (fileType === 'image' || fileType === 'gif') {
-      const optimizedFileName = `${slug}-${Date.now()}.webp`;
-      const optimizedFullPath = path.join(OPTIMIZED_DIR, optimizedFileName);
-      optimizedPath = `/uploads/optimized/${optimizedFileName}`;
-
-      const image = sharp(filePath);
-      const metadata = await image.metadata();
-      width = metadata.width;
-      height = metadata.height;
-
-      await image
-        .resize({ width: 1280, withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toFile(optimizedFullPath);
+      try {
+        const image = sharp(filePath);
+        const meta = await image.metadata();
+        width = meta.width;
+        height = meta.height;
+      } catch (err) {
+        console.warn('Không đọc được metadata ảnh:', err.message);
+      }
     }
 
-    // ✅ Tạo bản ghi trong CSDL
+    // ✅ Lưu thông tin vào DB
     const media = await Media.create({
+      type_name,
       file_name: originalname,
       file_type: fileType,
       mime_type: mimetype,
       file_size: size,
       original_path: originalPath,
-      optimized_path: optimizedPath,
+      optimized_path: null, // không cần nén
       seo_title: seoTitle,
       seo_alt: seoTitle,
       seo_slug: slug,
@@ -73,13 +70,13 @@ exports.uploadMedia = async (req, res) => {
       status: 'active',
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: 'Upload thành công!',
       data: media,
     });
   } catch (error) {
     console.error('Lỗi upload:', error);
-    return res.status(500).json({ message: 'Lỗi khi upload file.', error: error.message });
+    res.status(500).json({ message: 'Lỗi khi upload file.', error: error.message });
   }
 };
 
@@ -88,12 +85,12 @@ exports.getAllMedia = async (req, res) => {
   try {
     const mediaList = await Media.findAll({
       where: { status: 'active' },
-      order: [['media_id', 'DESC']],
+      order: [['media_id', 'ASC']],
     });
-    return res.json(mediaList);
+    res.json(mediaList);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Lỗi khi lấy danh sách media.' });
+    res.status(500).json({ message: 'Lỗi khi lấy danh sách media.' });
   }
 };
 
@@ -103,10 +100,10 @@ exports.getMediaById = async (req, res) => {
     const { id } = req.params;
     const media = await Media.findByPk(id);
     if (!media) return res.status(404).json({ message: 'Không tìm thấy media.' });
-    return res.json(media);
+    res.json(media);
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Lỗi khi lấy media.' });
+    res.status(500).json({ message: 'Lỗi khi lấy media.' });
   }
 };
 
@@ -115,15 +112,47 @@ exports.deleteMedia = async (req, res) => {
   try {
     const { id } = req.params;
     const media = await Media.findByPk(id);
-
     if (!media) return res.status(404).json({ message: 'Không tìm thấy media.' });
 
     media.status = 'deleted';
     await media.save();
 
-    return res.json({ message: 'Đã xóa media thành công.' });
+    res.json({ message: 'Đã xóa media thành công.' });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Lỗi khi xóa media.' });
+    res.status(500).json({ message: 'Lỗi khi xóa media.' });
+  }
+};
+
+// 🟡 Lấy media theo loại (type_name)
+exports.getMediaByType = async (req, res) => {
+  try {
+    const { type } = req.params;
+
+    const allowedTypes = [
+      'logo', 'thuonghieu', 'nen', 'avt_macdinh', 'bia_macdinh',
+      'banner1', 'banner2', 'banner3', 'banner4', 'banner5'
+    ];
+
+    if (!allowedTypes.includes(type)) {
+      return res.status(400).json({ message: 'Loại media không hợp lệ.' });
+    }
+
+    const media = await Media.findOne({
+      where: {
+        type_name: type,
+        status: 'active',
+      },
+      order: [['media_id', 'DESC']], // Lấy file mới nhất
+    });
+
+    if (!media) {
+      return res.status(404).json({ message: 'Không tìm thấy media cho loại này.' });
+    }
+
+    return res.json(media);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Lỗi khi lấy media theo loại.' });
   }
 };

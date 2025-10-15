@@ -1,13 +1,29 @@
-// models/media.model.js
 module.exports = (sequelize, DataTypes) => {
   const Media = sequelize.define('Media', {
     media_id: {
       type: DataTypes.INTEGER.UNSIGNED,
       primaryKey: true,
       autoIncrement: true,
+      allowNull: false,
+    },
+    type_name: {
+      type: DataTypes.ENUM(
+        'logo',
+        'thuonghieu',
+        'nen',
+        'avt_macdinh',
+        'bia_macdinh',
+        'banner1',
+        'banner2',
+        'banner3',
+        'banner4',
+        'banner5'
+      ),
+      allowNull: false,
+      comment: 'Loại media (logo, banner, nền, v.v.)',
     },
     file_name: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
       comment: 'Tên gốc của file khi upload',
     },
@@ -17,9 +33,9 @@ module.exports = (sequelize, DataTypes) => {
       comment: 'Phân loại file',
     },
     mime_type: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(100),
       allowNull: false,
-      comment: 'Loại MIME, ví dụ image/jpeg, video/mp4,...',
+      comment: 'Loại MIME, ví dụ: image/jpeg, video/mp4',
     },
     file_size: {
       type: DataTypes.INTEGER.UNSIGNED,
@@ -27,53 +43,56 @@ module.exports = (sequelize, DataTypes) => {
       comment: 'Dung lượng file (bytes)',
     },
     original_path: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(512),
       allowNull: false,
       comment: 'Đường dẫn gốc (chưa nén)',
     },
     optimized_path: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(512),
       allowNull: true,
       comment: 'Đường dẫn file sau khi nén hoặc tối ưu hóa',
     },
     seo_title: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
-      comment: 'Tiêu đề SEO cho file',
     },
     seo_alt: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
-      comment: 'Alt text cho ảnh – giúp SEO hình ảnh',
     },
     seo_slug: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: true,
       unique: true,
-      comment: 'Đường dẫn thân thiện SEO (slug)',
     },
     width: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
-      comment: 'Chiều rộng ảnh/video (nếu có)',
     },
     height: {
       type: DataTypes.INTEGER.UNSIGNED,
       allowNull: true,
-      comment: 'Chiều cao ảnh/video (nếu có)',
     },
     status: {
       type: DataTypes.ENUM('active', 'inactive', 'deleted'),
       defaultValue: 'active',
+      allowNull: false,
     },
     created_at: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      allowNull: false,
     },
   }, {
     tableName: 'media',
-    timestamps: false,
+    timestamps: false, // Không sử dụng timestamps tự động của Sequelize
+    underscored: true, // Sử dụng snake_case cho tên cột nếu cần nhất quán
   });
+
+  // Nếu cần định nghĩa các mối quan hệ (associations), thêm ở đây
+  Media.associate = (models) => {
+    // Ví dụ: Media.belongsTo(models.OtherModel);
+  };
 
   return Media;
 };
