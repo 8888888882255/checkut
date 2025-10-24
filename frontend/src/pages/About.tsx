@@ -13,10 +13,10 @@ export default function About() {
         <section className="gradient-hero py-16 px-4 text-center">
           <div className="container mx-auto max-w-3xl">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fade-in">
-              Về CheckUT.Vn
+              Về AdminMmo
             </h1>
             <p className="text-base md:text-lg text-muted-foreground animate-slide-up leading-relaxed">
-              CheckUT.Vn là nền tảng giúp người dùng kiểm tra uy tín của cá nhân,
+              AdminMmo là nền tảng giúp người dùng kiểm tra uy tín của cá nhân,
               tổ chức hoặc thương hiệu trước khi giao dịch, nhằm xây dựng môi trường
               minh bạch và đáng tin cậy tại Việt Nam.
             </p>
@@ -27,7 +27,7 @@ export default function About() {
         <section className="py-12 px-4">
           <div className="container mx-auto max-w-4xl">
             <div className="mb-12 text-center md:text-left">
-              <h2 className="text-3xl font-bold mb-4">Sứ mệnh của CheckUT.Vn</h2>
+              <h2 className="text-3xl font-bold mb-4">Sứ mệnh của AdminMmo</h2>
               <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
                 Chúng tôi mong muốn tạo ra một hệ sinh thái kiểm tra uy tín minh bạch,
                 nơi người dùng có thể dễ dàng tra cứu thông tin, chia sẻ đánh giá
@@ -149,7 +149,7 @@ export default function About() {
         <section className="py-12 px-4">
           <div className="container mx-auto max-w-4xl">
             <h2 className="text-3xl font-bold mb-8 text-center md:text-left">
-              Quy tắc cộng đồng CheckUT.Vn
+              Quy tắc cộng đồng AdminMmo
             </h2>
             <div className="space-y-4 text-muted-foreground text-sm">
               <div className="flex gap-3">

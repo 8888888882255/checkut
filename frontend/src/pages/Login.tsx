@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -13,28 +13,57 @@ import { toast } from "sonner";
 export default function Login() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Lấy giá trị chuẩn từ file .env
+  const defaultEmail = import.meta.env.VITE_DEFAULT_EMAIL || "";
+  const defaultPassword = import.meta.env.VITE_DEFAULT_PASSWORD || "";
+
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
     remember: false,
   });
 
+  // ✅ Khi load trang, tự điền email đã lưu (nếu có)
+  useEffect(() => {
+    const savedEmail =
+      localStorage.getItem("savedEmail") || sessionStorage.getItem("savedEmail");
+    if (savedEmail) {
+      setLoginData((prev) => ({ ...prev, email: savedEmail }));
+    }
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!loginData.email || !loginData.password) {
+    const { email, password, remember } = loginData;
+
+    if (!email || !password) {
       toast.error("Vui lòng nhập đầy đủ thông tin đăng nhập");
       return;
     }
 
+    // Kiểm tra thông tin nhập vào với .env
+    if (email !== defaultEmail || password !== defaultPassword) {
+      toast.error("Sai email hoặc mật khẩu");
+      return;
+    }
+
     setIsLoading(true);
-
-    // Giả lập quá trình đăng nhập (API call)
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsLoading(false);
+
     toast.success("Đăng nhập thành công!");
-    navigate("/");
+
+    // ✅ Lưu email tùy chọn
+    if (remember) {
+      localStorage.setItem("savedEmail", email);
+    } else {
+      sessionStorage.setItem("savedEmail", email);
+    }
+
+    // ✅ Điều hướng đến /admin
+    navigate("/admin");
   };
 
   return (
@@ -43,14 +72,14 @@ export default function Login() {
 
       <main className="flex-1 flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md">
-          {/* Phần tiêu đề */}
+          {/* Tiêu đề */}
           <div className="text-center mb-8 animate-fade-in">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-primary mb-4">
               <AlertCircle className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold mb-2">Đăng nhập hệ thống</h1>
             <p className="text-muted-foreground text-sm md:text-base">
-              Vui lòng đăng nhập để sử dụng CheckUT.Vn
+              Vui lòng đăng nhập để sử dụng AdminMmo
             </p>
           </div>
 

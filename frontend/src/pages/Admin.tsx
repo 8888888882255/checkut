@@ -1,255 +1,202 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { toast } from "sonner";
-import { ImagePlus, Trash2, UploadCloud } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+} from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// Định nghĩa interface cho dữ liệu media
-interface MediaItem {
-  media_id: number;
-  original_path: string;
-  type_name: string;
+const COLORS = ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"];
+
+interface User {
+  id: number;
+  name: string;
+  role: "admin" | "qtv";
+  avatar: string;
+  status: "active" | "inactive";
+  soTaiKhoan: string;
+  nganHang: string;
+  ngayThamGia: string;
+  slug: string;
+  facebook: { chinh: string; phu?: string };
+  zalo?: string;
+  web?: string;
+  baoHiem: { ngayDangKy: string; soTien: number; nguoiBaoHiem: string };
+  dichVu: string[];
+  chuTaiKhoan: string;
+  stkKhac: { nganHang: string; soTaiKhoan: string }[];
 }
 
-// Định nghĩa interface cho loại media
-interface MediaType {
-  key: string;
-  label: string;
-}
+export default function AdminDashboard() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [statusesData, setStatusesData] = useState<{ name: string; value: number }[]>([]);
+  const [joinData, setJoinData] = useState<{ date: string; users: number }[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalInsurance, setTotalInsurance] = useState(0);
+  const [totalServices, setTotalServices] = useState(0);
 
-// Danh sách các loại media
-const LOAI_MEDIA: MediaType[] = [
-  { key: "logo", label: "Logo" },
-  { key: "thuonghieu", label: "Ảnh thương hiệu" },
-  { key: "nen", label: "Ảnh nền" },
-  { key: "avt_macdinh", label: "Ảnh đại diện mặc định" },
-  { key: "bia_macdinh", label: "Ảnh bìa mặc định" },
-  { key: "banner1", label: "Banner 1" },
-  { key: "banner2", label: "Banner 2" },
-  { key: "banner3", label: "Banner 3" },
-  { key: "banner4", label: "Banner 4" },
-  { key: "banner5", label: "Banner 5" },
-];
-
-export default function LoaiMediaAdmin() {
-  const [mediaData, setMediaData] = useState<Record<string, MediaItem | null>>({});
-  const [selectedType, setSelectedType] = useState<string>("");
-  const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // Lấy dữ liệu tất cả loại media
-  const fetchAllMedia = useCallback(async () => {
-    try {
-      setLoading(true);
-      const result: Record<string, MediaItem | null> = {};
-      // Sử dụng Promise.all để gọi API song song, tăng hiệu suất
-      const promises = LOAI_MEDIA.map(async (item) => {
-        const res = await fetch(`/api/media/type/${item.key}`);
-        if (res.ok) {
-          return [item.key, await res.json()];
-        }
-        return [item.key, null];
-      });
-      const resolved = await Promise.all(promises);
-      resolved.forEach(([key, data]) => {
-        result[key] = data;
-      });
-      setMediaData(result);
-    } catch (error) {
-      console.error("Lỗi khi tải danh sách media:", error);
-      toast.error("Không thể tải danh sách media.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Gọi fetchAllMedia khi component mount
   useEffect(() => {
-    fetchAllMedia();
-  }, [fetchAllMedia]);
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("/user.json");
+        if (!response.ok) throw new Error("Không thể tải dữ liệu người dùng");
+        const data: User[] = await response.json();
+        const filtered = data.filter((u) => u.role === "admin" || u.role === "qtv");
+        setUsers(filtered);
 
-  // Xử lý upload file
-  const handleUpload = async () => {
-    if (!selectedType || !file) {
-      toast.warning("Vui lòng chọn loại media và file trước khi upload.");
-      return;
-    }
+        const statusCounts = filtered.reduce((acc, user) => {
+          acc[user.status] = (acc[user.status] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>);
+        setStatusesData(
+          Object.entries(statusCounts).map(([name, value]) => ({
+            name: name === "active" ? "Đang hoạt động" : "Ngừng hoạt động",
+            value,
+          }))
+        );
 
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type_name", selectedType);
+        const sortedDates = [...filtered].sort(
+          (a, b) => new Date(a.ngayThamGia).getTime() - new Date(b.ngayThamGia).getTime()
+        );
+        const cumulative = sortedDates.map((user, index) => ({
+          date: new Date(user.ngayThamGia).toLocaleDateString("vi-VN"),
+          users: index + 1,
+        }));
+        setJoinData(cumulative);
 
-      const res = await fetch("/api/media/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+        setTotalUsers(filtered.length);
+        setTotalInsurance(filtered.reduce((sum, user) => sum + user.baoHiem.soTien, 0));
+        setTotalServices(filtered.reduce((sum, user) => sum + user.dichVu.length, 0));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      toast.success("Upload media thành công!");
-      setFile(null);
-      setSelectedType("");
-      await fetchAllMedia(); // Cập nhật danh sách media sau khi upload
-    } catch (error) {
-      console.error("Lỗi khi upload media:", error);
-      toast.error("Đã xảy ra lỗi khi upload media.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Xử lý xóa media
-  const handleDelete = async (id: number, typeLabel: string) => {
-    if (!confirm(`Bạn có chắc chắn muốn xóa ${typeLabel}?`)) return;
-
-    try {
-      setLoading(true);
-      const res = await fetch(`/api/media/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      toast.success(`Đã xóa ${typeLabel} thành công!`);
-      await fetchAllMedia(); // Cập nhật danh sách sau khi xóa
-    } catch (error) {
-      console.error(`Lỗi khi xóa ${typeLabel}:`, error);
-      toast.error(`Không thể xóa ${typeLabel}.`);
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchUsers();
+  }, []);
 
   return (
     <AdminLayout>
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="space-y-6">
-          {/* Tiêu đề */}
-          <div>
-            <h1 className="text-3xl font-bold">🖼️ Quản lý Loại Media</h1>
-            <p className="text-muted-foreground mt-1">
-              Quản lý, upload hoặc xóa các loại hình ảnh hệ thống như logo, banner, ảnh nền, v.v.
-            </p>
+      <div className="container mx-auto px-2 py-4 md:px-4 md:py-6 lg:px-6 lg:py-8 max-w-7xl">
+        <div className="space-y-4 md:space-y-6">
+          <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+            📊 Thống kê quản trị
+          </h1>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            <Card className="bg-gradient-to-br from-pink-100 to-pink-200 dark:from-pink-900 dark:to-pink-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Tổng số quản trị viên</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <div className="text-2xl font-bold text-pink-600 dark:text-pink-300">{totalUsers}</div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Tổng tiền bảo hiểm (VND)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-32" />
+                ) : (
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-300">
+                    {totalInsurance.toLocaleString("vi-VN")}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Tổng số dịch vụ</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-300">{totalServices}</div>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Phần Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle>⬆️ Upload Media</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <select
-                  value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
-                  className="border rounded-md px-3 py-2 w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-primary"
-                  disabled={loading}
-                >
-                  <option value="">-- Chọn loại media --</option>
-                  {LOAI_MEDIA.map((item) => (
-                    <option key={item.key} value={item.key}>
-                      {item.label}
-                    </option>
-                  ))}
-                </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <Card className="bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800">
+              <CardHeader>
+                <CardTitle className="text-green-700 dark:text-green-300">
+                  Số lượng quản trị viên theo thời gian
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-[250px] md:h-[300px] w-full" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart data={joinData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="users"
+                        name="Danh sách Admin"
+                        stroke="#22c55e"
+                        activeDot={{ r: 8 }}
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
 
-                <input
-                  type="file"
-                  accept="image/*,image/gif"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  className="w-full md:w-1/3 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                  disabled={loading}
-                />
+            <Card className="bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-yellow-900 dark:to-yellow-800">
+              <CardHeader>
+                <CardTitle className="text-yellow-700 dark:text-yellow-300">Trạng thái tài khoản</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-[250px] md:h-[300px] w-full" />
+                ) : (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={statusesData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="value" name="Trạng thái Admin" radius={[4, 4, 0, 0]}>
+                        {statusesData.map((entry, index) => (
+                          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        ))} </Bar>
 
-                <Button
-                  onClick={handleUpload}
-                  disabled={loading || !selectedType || !file}
-                  className="w-full md:w-1/4"
-                >
-                  <UploadCloud className="h-4 w-4 mr-2" />
-                  {loading ? "Đang tải..." : "Upload"}
-                </Button>
-              </div>
-              {file && (
-                <p className="text-sm mt-3 text-muted-foreground">
-                  File đã chọn: <span className="font-medium">{file.name}</span> (
-                  {(file.size / 1024).toFixed(1)} KB)
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Danh sách media */}
-          <Card>
-            <CardHeader>
-              <CardTitle>📋 Danh sách Loại Media</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">STT</TableHead>
-                    <TableHead>Loại</TableHead>
-                    <TableHead>Hình ảnh</TableHead>
-                    <TableHead>Đường dẫn</TableHead>
-                    <TableHead className="text-right">Hành động</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {LOAI_MEDIA.map((item, idx) => {
-                    const data = mediaData[item.key];
-                    return (
-                      <TableRow key={item.key}>
-                        <TableCell>{idx + 1}</TableCell>
-                        <TableCell className="font-medium">{item.label}</TableCell>
-                        <TableCell>
-                          {data?.original_path ? (
-                            <img
-                              src={data.original_path}
-                              alt={item.label}
-                              className="w-20 h-12 object-cover rounded-md border"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="text-muted-foreground flex items-center gap-1">
-                              <ImagePlus className="h-4 w-4" /> Chưa có
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                          {data?.original_path || "—"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {data ? (
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDelete(data.media_id, item.label)}
-                              disabled={loading}
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Xóa
-                            </Button>
-                          ) : (
-                            <span className="text-muted-foreground">Không có dữ liệu</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-              {loading && (
-                <p className="text-center text-muted-foreground mt-4">Đang tải dữ liệu...</p>
-              )}
-            </CardContent>
-          </Card>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </AdminLayout>

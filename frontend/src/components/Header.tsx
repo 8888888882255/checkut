@@ -16,41 +16,30 @@ export const Header = () => {
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shadow-soft">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center group-hover:scale-110 transition-smooth">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01M8.28 4.22a9.96 9.96 0 000 15.56m7.44-15.56a9.96 9.96 0 010 15.56"
-                />
-              </svg>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              Admmo.info
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 backdrop-blur-md shadow-lg">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Logo + tên thương hiệu */}
+          <Link to="/" className="flex items-center gap-3 group">
+            <img
+              src="/Logo.jpg"
+              alt="Logo AdminMmo"
+              className="w-12 h-12 rounded-2xl object-cover shadow-md group-hover:scale-110 transition-transform duration-300"
+            />
+            <span className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent group-hover:opacity-80 transition-opacity">
+              AdminMmo
             </span>
           </Link>
 
-          {/* Actions */}
+          {/* Menu + Theme Toggle */}
           <div className="flex items-center gap-3">
-            {/* Các nút hiển thị trên desktop */}
+            {/* Desktop menu */}
             <div className="hidden md:flex items-center gap-3">
               <Button
                 variant="hero"
                 size="default"
                 onClick={() => navigate("/")}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition-all"
               >
                 🚨 Danh Sách Admin
               </Button>
@@ -58,7 +47,7 @@ export const Header = () => {
                 variant="outline"
                 size="default"
                 onClick={() => navigate("/policy")}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
               >
                 Chính Sách
               </Button>
@@ -66,40 +55,38 @@ export const Header = () => {
                 variant="outline"
                 size="default"
                 onClick={() => navigate("/about")}
-                className="whitespace-nowrap"
+                className="whitespace-nowrap border-purple-400 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30"
               >
                 Giới Thiệu
               </Button>
             </div>
 
-            {/* Nút dark mode */}
+            {/* Dark mode toggle */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-xl border border-gray-300 dark:border-gray-600"
+              className="rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
             >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-blue-500" />}
             </Button>
 
-
-            {/* Nút menu mobile */}
+            {/* Menu mobile */}
             <Button
               variant="ghost"
               size="icon"
               onClick={toggleMenu}
-              className="md:hidden rounded-xl border border-gray-300 dark:border-gray-600"
+              className="md:hidden rounded-xl border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
             >
               {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
-
           </div>
         </div>
 
-        {/* Menu mobile */}
+        {/* Mobile Menu */}
         {menuOpen && (
           <div className="mt-3 flex justify-center md:hidden animate-fade-in">
-            <div className="w-[90%] max-w-[320px] flex flex-col gap-2 p-4 border border-gray-300 rounded-2xl shadow-md bg-white">
+            <div className="w-[90%] max-w-[340px] flex flex-col gap-3 p-4 border border-gray-300 dark:border-gray-700 rounded-2xl shadow-xl bg-white dark:bg-gray-900/90 backdrop-blur-md">
               <Button
                 variant="hero"
                 size="default"
@@ -107,6 +94,7 @@ export const Header = () => {
                   navigate("/");
                   setMenuOpen(false);
                 }}
+                className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:opacity-90"
               >
                 🚨 Danh Sách Admin
               </Button>
@@ -116,6 +104,7 @@ export const Header = () => {
                   navigate("/policy");
                   setMenuOpen(false);
                 }}
+                className="border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
               >
                 Chính Sách
               </Button>
@@ -125,13 +114,13 @@ export const Header = () => {
                   navigate("/about");
                   setMenuOpen(false);
                 }}
+                className="border-purple-400 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30"
               >
                 Giới Thiệu
               </Button>
             </div>
           </div>
         )}
-
       </div>
     </header>
   );

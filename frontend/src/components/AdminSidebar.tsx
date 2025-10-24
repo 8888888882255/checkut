@@ -38,7 +38,7 @@ export function AdminSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
-  
+
   // TODO: Get from auth context/backend
   const userRole = "SuperAdmin";
 
@@ -67,12 +67,16 @@ export function AdminSidebar() {
     >
       <SidebarHeader className="border-b px-4 py-3">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-            <span className="text-primary font-bold text-lg">✓</span>
-          </div>
+          <div
+            className="h-8 w-8 bg-[url('/Logo.jpg')] bg-cover bg-center rounded-lg"
+          ></div>
           {state !== "collapsed" && (
             <div className="flex flex-col">
-              <span className="font-semibold text-sm">Admmo Admin</span>
+              <span
+                className="font-semibold text-base bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+              >
+                AdminMmo
+              </span>
             </div>
           )}
         </div>

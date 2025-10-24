@@ -10,7 +10,7 @@ export default function Policy() {
       <main className="flex-1 py-12 px-4 md:py-16">
         <div className="container mx-auto max-w-4xl">
           <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center md:text-left animate-fade-in">
-            Chính sách & Điều khoản - CheckUT.Vn
+            Chính sách & Điều khoản - AdminMmo
           </h1>
 
           <div className="space-y-8">
@@ -20,7 +20,7 @@ export default function Policy() {
                 <h2 className="text-2xl font-semibold mb-4">1. Chính sách bảo mật</h2>
                 <div className="space-y-4 text-muted-foreground text-sm md:text-base">
                   <p>
-                    CheckUT.Vn cam kết bảo vệ quyền riêng tư của người dùng. Chúng tôi chỉ thu thập
+                    AdminMmo cam kết bảo vệ quyền riêng tư của người dùng. Chúng tôi chỉ thu thập
                     các thông tin cần thiết để cung cấp dịch vụ kiểm tra uy tín và không chia sẻ dữ liệu cá nhân
                     với bên thứ ba nếu không có sự đồng ý của bạn.
                   </p>
@@ -39,7 +39,7 @@ export default function Policy() {
               <CardContent className="pt-6">
                 <h2 className="text-2xl font-semibold mb-4">2. Điều khoản sử dụng</h2>
                 <div className="space-y-4 text-muted-foreground text-sm md:text-base">
-                  <p>Khi sử dụng CheckUT.Vn, bạn đồng ý rằng:</p>
+                  <p>Khi sử dụng AdminMmo, bạn đồng ý rằng:</p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Cung cấp thông tin trung thực, chính xác và minh bạch</li>
                     <li>Không đăng tải nội dung sai sự thật, bôi nhọ hoặc gây hiểu nhầm</li>
@@ -74,7 +74,7 @@ export default function Policy() {
                 <h2 className="text-2xl font-semibold mb-4">4. Xử lý vi phạm</h2>
                 <div className="space-y-4 text-muted-foreground text-sm md:text-base">
                   <p>
-                    CheckUT.Vn có quyền thực hiện các biện pháp phù hợp khi phát hiện hành vi vi phạm:
+                    AdminMmo có quyền thực hiện các biện pháp phù hợp khi phát hiện hành vi vi phạm:
                   </p>
                   <ul className="list-disc list-inside space-y-2 ml-4">
                     <li>Xóa hoặc ẩn nội dung không phù hợp</li>
@@ -93,7 +93,7 @@ export default function Policy() {
                 <h2 className="text-2xl font-semibold mb-4">5. Giới hạn trách nhiệm</h2>
                 <div className="space-y-4 text-muted-foreground text-sm md:text-base">
                   <p>
-                    CheckUT.Vn là nền tảng chia sẻ thông tin đánh giá uy tín dựa trên đóng góp của cộng đồng.
+                    AdminMmo là nền tảng chia sẻ thông tin đánh giá uy tín dựa trên đóng góp của cộng đồng.
                     Chúng tôi không chịu trách nhiệm đối với:
                   </p>
                   <ul className="list-disc list-inside space-y-2 ml-4">

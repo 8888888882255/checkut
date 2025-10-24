@@ -8,7 +8,7 @@ export const Footer = () => {
           
           {/* Logo + mô tả */}
           <div className="text-sm text-muted-foreground">
-            <p className="font-medium text-primary">© 2025 CheckUT.Vn</p>
+            <p className="font-medium text-primary">© 2025 AdminMmo</p>
             <p>Hệ thống kiểm tra uy tín hàng đầu Việt Nam.</p>
           </div>
 
