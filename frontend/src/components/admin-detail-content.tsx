@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+"use client";
+
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
 import { ShieldCheck, Lock, Facebook, Globe, MessageCircle } from "lucide-react";
 
 interface FacebookInfo {
@@ -23,7 +22,7 @@ interface TaiKhoanPhu {
   soTaiKhoan: string;
 }
 
-interface User {
+export interface User {
   id: number;
   name: string;
   username?: string;
@@ -43,34 +42,11 @@ interface User {
   stkKhac?: TaiKhoanPhu[];
 }
 
-export default function AdminDetail() {
-  const { slug } = useParams<{ slug: string }>();
-  const [admin, setAdmin] = useState<User | null>(null);
+interface AdminDetailContentProps {
+  admin: User;
+}
 
-  useEffect(() => {
-    const fetchAdmin = async () => {
-      try {
-        const response = await fetch("/user.json");
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data: User[] = await response.json();
-        const foundAdmin = data.find((user) => user.slug === slug);
-        
-        if (!foundAdmin) {
-          toast.error("Không tìm thấy admin!");
-          setAdmin(null);
-          return;
-        }
-        
-        setAdmin(foundAdmin);
-      } catch (error) {
-        toast.error("Lỗi khi tải dữ liệu admin.");
-        console.error("Fetch error:", error);
-      }
-    };
-
-    fetchAdmin();
-  }, [slug]);
-
+export default function AdminDetailContent({ admin }: AdminDetailContentProps) {
   if (!admin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-200">

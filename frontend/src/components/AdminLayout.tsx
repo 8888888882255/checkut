@@ -1,9 +1,11 @@
+"use client";
+
 import { ReactNode, useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "./AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { LogOut, User, Moon, Sun } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -19,11 +21,14 @@ interface AdminLayoutProps {
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isDark, setIsDark] = useState(false);
 
   // Lấy email từ storage (local hoặc session)
-  const savedEmail = localStorage.getItem("savedEmail") || sessionStorage.getItem("savedEmail") || "admin@example.com";
+  // Check window exists for SSR safety
+  const savedEmail = typeof window !== "undefined" 
+    ? (localStorage.getItem("savedEmail") || sessionStorage.getItem("savedEmail") || "admin@example.com")
+    : "admin@example.com";
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -39,7 +44,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     toast.success("Đăng xuất thành công!");
 
     // Chuyển hướng về trang đăng nhập
-    navigate("/login");
+    router.push("/login");
   };
 
   return (

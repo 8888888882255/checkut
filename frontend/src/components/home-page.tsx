@@ -1,12 +1,14 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 
-interface User {
+export interface User {
   id: number;
   name: string;
   role: "admin" | "qtv";
@@ -23,30 +25,28 @@ interface User {
   };
 }
 
-export default function Home() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const navigate = useNavigate();
+interface HomePageProps {
+  initialUsers: User[];
+}
 
+export default function HomePage({ initialUsers }: HomePageProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>(initialUsers);
+  const router = useRouter();
+
+  // Sort users on initial load (although passing sorted data from server is better)
   useEffect(() => {
-    fetch("/user.json")
-      .then((res) => res.json())
-      .then((data) => {
-        // Sắp xếp theo số tiền bảo hiểm giảm dần
-        const sorted = [...data].sort(
-          (a, b) => (b.baoHiem?.soTien || 0) - (a.baoHiem?.soTien || 0)
-        );
-        setUsers(sorted);
-        setFilteredUsers(sorted);
-      })
-      .catch((error) => console.error("Lỗi khi tải dữ liệu:", error));
-  }, []);
+    const sorted = [...initialUsers].sort(
+      (a, b) => (b.baoHiem?.soTien || 0) - (a.baoHiem?.soTien || 0)
+    );
+    setUsers(sorted);
+    setFilteredUsers(sorted);
+  }, [initialUsers]);
 
   useEffect(() => {
     const query = searchQuery.toLowerCase().trim();
     if (query === "") {
-      // Giữ nguyên thứ tự đã sắp xếp
       setFilteredUsers(users);
       return;
     }
@@ -71,7 +71,7 @@ export default function Home() {
         <section className="relative py-20 px-4 overflow-hidden bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
           <div className="absolute inset-0 opacity-15">
             <img
-              src={heroImage}
+              src={heroImage.src}
               alt="Hero"
               className="w-full h-full object-cover blur-sm"
             />
@@ -116,7 +116,7 @@ export default function Home() {
                 {qtvList.map((qtv, index) => (
                   <div
                     key={qtv.id}
-                    onClick={() => navigate(`/${qtv.slug}`)}
+                    onClick={() => router.push(`/${qtv.slug}`)}
                     className="cursor-pointer flex flex-col items-center transition-transform duration-300 hover:scale-110"
                   >
                     <div className="relative group">
@@ -151,7 +151,7 @@ export default function Home() {
                 {adminList.map((admin, index) => (
                   <div
                     key={admin.id}
-                    onClick={() => navigate(`/${admin.slug}`)}
+                    onClick={() => router.push(`/${admin.slug}`)}
                     className="cursor-pointer flex flex-col items-center transition-transform duration-300 hover:scale-110"
                   >
                     <div className="relative group">

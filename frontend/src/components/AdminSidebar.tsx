@@ -1,10 +1,10 @@
-import { NavLink, useLocation } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
-  FileText,
-  MessageSquare,
-  Settings,
 } from "lucide-react";
 import {
   Sidebar,
@@ -36,17 +36,16 @@ const menuItems = [
 
 export function AdminSidebar() {
   const { state } = useSidebar();
-  const location = useLocation();
-  const currentPath = location.pathname;
+  const pathname = usePathname();
 
   // TODO: Get from auth context/backend
   const userRole = "SuperAdmin";
 
   const isActive = (path: string) => {
     if (path === "/admin") {
-      return currentPath === "/admin";
+      return pathname === "/admin";
     }
-    return currentPath.startsWith(path);
+    return pathname.startsWith(path);
   };
 
   const filteredItems = menuItems.filter((item) =>
@@ -90,14 +89,13 @@ export function AdminSidebar() {
               {filteredItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/admin"}
+                    <Link
+                      href={item.url}
                       className={getNavCls(isActive(item.url))}
                     >
                       <item.icon className="h-4 w-4" />
                       {state !== "collapsed" && <span>{item.title}</span>}
-                    </NavLink>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
