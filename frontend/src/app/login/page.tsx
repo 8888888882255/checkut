@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,12 +13,12 @@ import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Login() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Lấy giá trị chuẩn từ file .env
-  const defaultEmail = import.meta.env.VITE_DEFAULT_EMAIL || "";
-  const defaultPassword = import.meta.env.VITE_DEFAULT_PASSWORD || "";
+  // Lấy giá trị chuẩn từ env, fallback cho dev
+  const defaultEmail = process.env.NEXT_PUBLIC_DEFAULT_EMAIL || "";
+  const defaultPassword = process.env.NEXT_PUBLIC_DEFAULT_PASSWORD || "";
 
   const [loginData, setLoginData] = useState({
     email: "",
@@ -44,6 +46,7 @@ export default function Login() {
     }
 
     // Kiểm tra thông tin nhập vào với .env
+    // Lưu ý: Trong thực tế nên check ở server API
     if (email !== defaultEmail || password !== defaultPassword) {
       toast.error("Sai email hoặc mật khẩu");
       return;
@@ -63,7 +66,7 @@ export default function Login() {
     }
 
     // ✅ Điều hướng đến /admin
-    navigate("/admin");
+    router.push("/admin");
   };
 
   return (

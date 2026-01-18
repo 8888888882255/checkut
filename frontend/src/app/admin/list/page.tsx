@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useCallback } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Input } from "@/components/ui/input";
@@ -73,7 +75,7 @@ interface User {
   stkKhac: TaiKhoanPhu[];
 }
 
-const AdminList = () => {
+export default function AdminList() {
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -771,6 +773,4 @@ const AdminList = () => {
       </AlertDialog>
     </AdminLayout>
   );
-};
-
-export default AdminList;
+}

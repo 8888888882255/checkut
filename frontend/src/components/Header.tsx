@@ -1,12 +1,15 @@
+"use client";
+
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Header = () => {
   const [isDark, setIsDark] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -20,7 +23,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo + tên thương hiệu */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group">
             <img
               src="/Logo.jpg"
               alt="Logo AdminMmo"
@@ -38,7 +41,7 @@ export const Header = () => {
               <Button
                 variant="hero"
                 size="default"
-                onClick={() => navigate("/")}
+                onClick={() => router.push("/")}
                 className="whitespace-nowrap font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition-all"
               >
                 🚨 Danh Sách Admin
@@ -46,7 +49,7 @@ export const Header = () => {
               <Button
                 variant="outline"
                 size="default"
-                onClick={() => navigate("/policy")}
+                onClick={() => router.push("/policy")}
                 className="whitespace-nowrap border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
               >
                 Chính Sách
@@ -54,7 +57,7 @@ export const Header = () => {
               <Button
                 variant="outline"
                 size="default"
-                onClick={() => navigate("/about")}
+                onClick={() => router.push("/about")}
                 className="whitespace-nowrap border-purple-400 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30"
               >
                 Giới Thiệu
@@ -91,7 +94,7 @@ export const Header = () => {
                 variant="hero"
                 size="default"
                 onClick={() => {
-                  navigate("/");
+                  router.push("/");
                   setMenuOpen(false);
                 }}
                 className="bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:opacity-90"
@@ -101,7 +104,7 @@ export const Header = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  navigate("/policy");
+                  router.push("/policy");
                   setMenuOpen(false);
                 }}
                 className="border-blue-400 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
@@ -111,7 +114,7 @@ export const Header = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  navigate("/about");
+                  router.push("/about");
                   setMenuOpen(false);
                 }}
                 className="border-purple-400 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30"
@@ -125,3 +128,4 @@ export const Header = () => {
     </header>
   );
 };
+
